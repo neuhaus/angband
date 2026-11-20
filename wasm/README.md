@@ -20,6 +20,11 @@ That script initializes both submodule levels if needed and is pinned to and
 verified with Emscripten 7.0.0.  If your active SDK differs from the pinned
 version, set `ALLOW_UNTESTED_EMSDK=1` as the script suggests.
 
+Pushing to the `wasm` branch also runs
+`.github/workflows/wasm-pages.yml`, which builds the bundle and publishes it
+to GitHub Pages (`https://neuhaus.github.io/angband/`).  That needs
+Settings → Pages → Source set to "GitHub Actions" in the fork.
+
 The build system detects Emscripten, enables `SUPPORT_GCU_FRONTEND`, and uses
 `UTW_CURSES=pdcurses`; no extra CMake options are needed.  The servable bundle
 is written to `build/web`:
