@@ -175,13 +175,13 @@ endfunction()
 macro(configure_gcu_frontend _NAME_TARGET)
     if(EMSCRIPTEN)
         # There is no system curses in the browser (Emscripten) build.  The
-        # GCU front end is compiled against the curses shim from the
-        # unix-tui-to-wasm runtime (enabled with UTW_CURSES, see CMakeLists.txt)
-        # which draws into the xterm.js terminal.
+        # GCU front end is compiled against the curses backend from the
+        # unix-tui-to-wasm runtime (UTW_CURSES, see CMakeLists.txt): the
+        # PDCursesMod VT port, which draws into the xterm.js terminal.
         target_compile_definitions(${_NAME_TARGET} PRIVATE
             USE_GCU
             HAVE_USE_DEFAULT_COLORS)
-        message(STATUS "Support for GCU front end - wasm curses shim")
+        message(STATUS "Support for GCU front end - wasm curses backend")
     else()
         angband_curses_create_target(CURSES_SELECTED)
         if(TARGET ${CURSES_SELECTED})
