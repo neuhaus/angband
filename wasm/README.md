@@ -14,9 +14,9 @@ source /path/to/emsdk/emsdk_env.sh
 ./wasm/build-wasm.sh
 ```
 
-The build was verified with Emscripten 6.0.12.  If your active SDK differs from
-the pinned version, set `ALLOW_UNTESTED_EMSDK=1` as the runtime's build script
-suggests.
+The build is pinned to and verified with Emscripten 7.0.0.  If your active SDK
+differs from the pinned version, set `ALLOW_UNTESTED_EMSDK=1` as the runtime's
+build script suggests.
 
 The build system detects Emscripten, enables `SUPPORT_GCU_FRONTEND`, and uses
 `UTW_CURSES`; no extra CMake options are needed.  The servable bundle is
