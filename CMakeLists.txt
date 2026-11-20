@@ -478,6 +478,7 @@ if(EMSCRIPTEN)
     endforeach()
 
     set(UTW_TITLE "Angband")
+    set(UTW_OUTPUT_NAME angband)
     set(UTW_COLS 100)
     set(UTW_ROWS 30)
     set(UTW_PERSIST ON)
