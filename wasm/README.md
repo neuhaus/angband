@@ -1,24 +1,24 @@
 # Angband in the browser
 
-This directory holds the [unix-tui-to-wasm](../unix-tui-to-wasm) runtime used
-by the WebAssembly build of Angband's text (GCU) front end.  The game is
-rendered through an xterm.js terminal and input goes through xterm-pty;
-curses calls from `src/main-gcu.c` are served by PDCursesMod's VT port
-(`wasm/PDCursesMod`, a git submodule), which emits the ANSI sequences that
-xterm.js understands.
+The WebAssembly build of Angband's text (GCU) front end uses the
+[unix-tui-to-wasm](https://github.com/neuhaus/unix-tui-to-wasm) runtime,
+checked out at `wasm/utw`.  The game is rendered through an xterm.js terminal
+and input goes through xterm-pty; curses calls from `src/main-gcu.c` are served
+by PDCursesMod's VT port (`wasm/utw/wasm/PDCursesMod`, a nested submodule),
+which emits the ANSI sequences xterm.js understands.
 
 ## Build
 
 ```sh
-# Emscripten (the runtime is pinned to the version in wasm/emsdk-version)
+# Emscripten (the runtime is pinned to the version in wasm/utw/wasm/emsdk-version)
 source /path/to/emsdk/emsdk_env.sh
 ./wasm/build-wasm.sh
 ```
 
-The build script fetches the `wasm/PDCursesMod` submodule if needed.  The
-build is pinned to and verified with Emscripten 7.0.0.  If your active SDK
-differs from the pinned version, set `ALLOW_UNTESTED_EMSDK=1` as the runtime's
-build script suggests.
+`wasm/build-wasm.sh` only sets `ROOT` and runs the runtime's build script.
+That script initializes both submodule levels if needed and is pinned to and
+verified with Emscripten 7.0.0.  If your active SDK differs from the pinned
+version, set `ALLOW_UNTESTED_EMSDK=1` as the script suggests.
 
 The build system detects Emscripten, enables `SUPPORT_GCU_FRONTEND`, and uses
 `UTW_CURSES=pdcurses`; no extra CMake options are needed.  The servable bundle

@@ -1,3 +1,4 @@
-[submodule "wasm/PDCursesMod"]
-	path = wasm/PDCursesMod
-	url = https://github.com/Bill-Gray/PDCursesMod.git
+[submodule "wasm/utw"]
+	path = wasm/utw
+	url = https://github.com/neuhaus/unix-tui-to-wasm.git
+	branch = main
