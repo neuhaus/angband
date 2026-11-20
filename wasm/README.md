@@ -34,4 +34,12 @@ python3 -m http.server 8000
 read-only at `/lib`.  Player state (saves, scores, user prefs) is written to
 `/data`, which the runtime mounts on IndexedDB, so it survives a page reload.
 
-The terminal is fixed at 100x30 (`UTW_COLS`/`UTW_ROWS` in `CMakeLists.txt`).
+The terminal defaults to 100x30 (`UTW_COLS`/`UTW_ROWS` in `CMakeLists.txt`).
+It can be chosen per load with a URL fragment, without rebuilding:
+
+```
+http://localhost:8000/#cols=120&rows=40
+```
+
+Reload the page to change it.  Angband requires at least 80x24; smaller
+values make it exit with its usual error message.
