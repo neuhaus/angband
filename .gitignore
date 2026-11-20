@@ -71,3 +71,5 @@ src/stats/db.dep
 src/tests/ran-already
 src/version.h
 build*/
+# fetched by wasm/build-wasm.sh
+/wasm/emscripten-pty.js

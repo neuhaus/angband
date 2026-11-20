@@ -173,19 +173,30 @@ function(angband_curses_create_target _TARGET_OUT)
 endfunction()
 
 macro(configure_gcu_frontend _NAME_TARGET)
-    angband_curses_create_target(CURSES_SELECTED)
-    if(TARGET ${CURSES_SELECTED})
-        target_link_libraries(${_NAME_TARGET} PRIVATE ${CURSES_SELECTED})
+    if(EMSCRIPTEN)
+        # There is no system curses in the browser (Emscripten) build.  The
+        # GCU front end is compiled against the curses shim from the
+        # unix-tui-to-wasm runtime (enabled with UTW_CURSES, see CMakeLists.txt)
+        # which draws into the xterm.js terminal.
         target_compile_definitions(${_NAME_TARGET} PRIVATE
             USE_GCU
-            $<$<BOOL:$<TARGET_PROPERTY:${CURSES_SELECTED},ANGBAND_PROP_CURSES_NCURSES>>:USE_NCURSES>
-            $<$<BOOL:$<TARGET_PROPERTY:${CURSES_SELECTED},ANGBAND_PROP_CURSES_HAS_USE_DEFAULT_COLORS>>:HAVE_USE_DEFAULT_COLORS>
-            $<$<BOOL:${WIN32}>:WIN32_CONSOLE_MODE>
-            $<$<BOOL:${MINGW}>:MSYS2_ENCODING_WORKAROUND>
-        )
-
-        message(STATUS "Support for GCU front end - Ready")
+            HAVE_USE_DEFAULT_COLORS)
+        message(STATUS "Support for GCU front end - wasm curses shim")
     else()
-        message(FATAL_ERROR "Support for GCU front end - curses not found")
+        angband_curses_create_target(CURSES_SELECTED)
+        if(TARGET ${CURSES_SELECTED})
+            target_link_libraries(${_NAME_TARGET} PRIVATE ${CURSES_SELECTED})
+            target_compile_definitions(${_NAME_TARGET} PRIVATE
+                USE_GCU
+                $<$<BOOL:$<TARGET_PROPERTY:${CURSES_SELECTED},ANGBAND_PROP_CURSES_NCURSES>>:USE_NCURSES>
+                $<$<BOOL:$<TARGET_PROPERTY:${CURSES_SELECTED},ANGBAND_PROP_CURSES_HAS_USE_DEFAULT_COLORS>>:HAVE_USE_DEFAULT_COLORS>
+                $<$<BOOL:${WIN32}>:WIN32_CONSOLE_MODE>
+                $<$<BOOL:${MINGW}>:MSYS2_ENCODING_WORKAROUND>
+            )
+
+            message(STATUS "Support for GCU front end - Ready")
+        else()
+            message(FATAL_ERROR "Support for GCU front end - curses not found")
+        endif()
     endif()
 endmacro()

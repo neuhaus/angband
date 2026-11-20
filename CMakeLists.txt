@@ -28,6 +28,13 @@ option(SUPPORT_STATS_BACKEND "Enable backend support for statistics and related 
 option(SUPPORT_BORG "Support for Borg." ON)
 option(SUPPORT_BORG_HIGH_SCORES "Borg characters allowed in high scores." OFF)
 
+# The browser build has no windowing system.  It uses the GCU (text) front
+# end together with the curses shim of the unix-tui-to-wasm runtime; see
+# wasm/.
+if(EMSCRIPTEN)
+    set(SUPPORT_GCU_FRONTEND ON)
+endif()
+
 # By default, generate a self-contained build left where the build was run.
 # If not using the Windows front end, the executable will have hardwired
 # relative paths to the game's data, and when run, the working directory should
@@ -460,6 +467,26 @@ if(SUPPORT_GCU_FRONTEND)
     include(src/cmake/macros/GCU_Frontend.cmake)
     configure_gcu_frontend(OurExecutable)
 endif()
+if(EMSCRIPTEN)
+    # Stage the data the text front end needs (not tiles, sounds or icons).
+    # The runtime preloads the stage directory at the virtual FS root, so the
+    # data ends up at /lib/... next to the hardwired DEFAULT_LIB_PATH.
+    set(UTW_DATA_DIR "${CMAKE_BINARY_DIR}/wasm-data")
+    foreach(_utw_dir gamedata help screens customize)
+        file(COPY "${CMAKE_CURRENT_SOURCE_DIR}/lib/${_utw_dir}"
+            DESTINATION "${UTW_DATA_DIR}/lib")
+    endforeach()
+
+    set(UTW_TITLE "Angband")
+    set(UTW_COLS 100)
+    set(UTW_ROWS 30)
+    set(UTW_PERSIST ON)
+    set(UTW_PERSIST_DIR "/data")
+    set(UTW_PRELOAD_DIR "${UTW_DATA_DIR}")
+    set(UTW_CURSES ON)
+    include("${CMAKE_CURRENT_SOURCE_DIR}/wasm/utw.cmake")
+    utw_enable(OurExecutable)
+endif()
 if(SUPPORT_SDL_FRONTEND)
     include(src/cmake/macros/SDL_Frontend.cmake)
     configure_sdl_frontend(OurExecutable)
@@ -775,15 +802,23 @@ if((SHARED_INSTALL) OR (READONLY_INSTALL))
 endif()
 
 if(SC_INSTALL)
-    set(ANGBAND_CONFIG_PATH ./lib/)
-    set(ANGBAND_LIB_PATH ./lib/)
-    # Would use lib/user here to match up with the preexisting structure from
-    # the source directory, but previous CMake builds used this (because of
-    # the default setting in config.h).  So, to be compatible if people
-    # rebuild on an existing copy, use this.  When there's backward
-    # incompatible changes to the save files, could change this since
-    # compatiblity with something already on disk will be less of a concern.
-    set(ANGBAND_DATA_PATH ./lib/)
+    if(EMSCRIPTEN)
+        # The browser build preloads lib/ at /lib (read-only) and persists
+        # the user's state in /data (mounted on IndexedDB by the runtime).
+        set(ANGBAND_CONFIG_PATH /lib/)
+        set(ANGBAND_LIB_PATH /lib/)
+        set(ANGBAND_DATA_PATH /data/)
+    else()
+        set(ANGBAND_CONFIG_PATH ./lib/)
+        set(ANGBAND_LIB_PATH ./lib/)
+        # Would use lib/user here to match up with the preexisting structure from
+        # the source directory, but previous CMake builds used this (because of
+        # the default setting in config.h).  So, to be compatible if people
+        # rebuild on an existing copy, use this.  When there's backward
+        # incompatible changes to the save files, could change this since
+        # compatiblity with something already on disk will be less of a concern.
+        set(ANGBAND_DATA_PATH ./lib/)
+    endif()
     # The Windows front end doesn't access these so don't set them in that case.
     if(NOT SUPPORT_WINDOWS_FRONTEND)
         target_compile_definitions(OurExecutable PRIVATE -D DEFAULT_CONFIG_PATH="${ANGBAND_CONFIG_PATH}")
